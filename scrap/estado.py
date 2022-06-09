@@ -8,9 +8,10 @@ import asyncio
 
 class Pagina:
     
-    def __init__(self, estado: Estado, perfil: Perfil) -> None:
+    def __init__(self, estado: Estado, perfil: Perfil, data) -> None:
         self._perfil = perfil
         self._estado = estado
+        self._data = data
         asyncio.get_event_loop().run_until_complete(self.empezar(estado))
         
     async def empezar(self, estado: Estado):
@@ -100,9 +101,9 @@ class EstadoLicitacion(Estado):
                 await self._pagina._pagina_actual.waitFor(250)
                 # print('tabla:' + str(est_exp))
                 # Comprobar si ya se tiene ese expediente por id y estado
-                if id_exp in self._pagina._perfil.data['id'].values:
+                if id_exp in self._pagina._data['id'].values:
                     query = 'id==\'' + str(id_exp) +'\''
-                    dummy = self._pagina._perfil.data.query(query)
+                    dummy = self._pagina._data.query(query)
                     # print(dummy['estado'].tolist())
                     if est_exp in dummy['estado'].tolist():
                         # print('ehe')
@@ -121,6 +122,7 @@ class EstadoLicitacion(Estado):
                 siguiente = await self._pagina._pagina_actual.querySelector('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:form1\:siguienteLink')
                 await siguiente.click()
                 await self._pagina._pagina_actual.waitForNavigation()
+        await self._pagina._buscador.close()
         
     async def guardar_expediente(self):
         datos = await self._pagina._pagina_actual.querySelector('#DetalleLicitacionVIS_UOE > div.capaAtributos.fondoAtributosDetalle')
