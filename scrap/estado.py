@@ -50,7 +50,6 @@ Acceso a la página principal del perfil
 ''' 
 class EstadoPerfil(Estado):
     async def ejecutar(self) -> None:
-        print('ESTADO PERFIL')
         await self._pagina._pagina_actual.goto(self._pagina._perfil.url)
         await self._pagina._pagina_actual.waitFor(100)
         await self._pagina.siguiente_estado(EstadoLicitaciones())
@@ -60,7 +59,6 @@ Acceso al apartado de licitaciones por primera vez y número de páginas de la t
 '''      
 class EstadoLicitaciones(Estado):
     async def ejecutar(self) -> None:
-        print('ESTADO LICITACION')
         licitaciones = await self._pagina._pagina_actual.querySelector("#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:perfilComp\:linkPrepLic")
         await licitaciones.click()
         await self._pagina._pagina_actual.waitForNavigation()

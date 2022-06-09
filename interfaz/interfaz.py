@@ -145,6 +145,7 @@ class MyFrame(tkinter.Frame):
         if os.path.exists(fichero):
             try:
                 self.data = pd.read_csv(self.ficheroFinal)
+                self.data = self.data.drop(['Unnamed: 0'], axis=1)
                 self.dataframes.append(self.data)
             except:
                 print(self.ficheroFinal, " está vacío.")
