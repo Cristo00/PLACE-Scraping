@@ -12,7 +12,7 @@ class Pagina:
         self._perfil = perfil
         self._estado = estado
         self._data = data
-        asyncio.get_event_loop().run_until_complete(self.empezar(estado))
+        asyncio.new_event_loop().run_until_complete(self.empezar(estado))
         
     async def empezar(self, estado: Estado):
         self._estado = estado

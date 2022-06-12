@@ -12,6 +12,7 @@ from tkinter.ttk import Frame, Button, Style, Label, Entry
 from place.perfil import *
 from scrap.estado import *
 
+
 class MyFrame(tkinter.Frame):
 
     def __init__(self):
@@ -166,15 +167,11 @@ class MyFrame(tkinter.Frame):
             perf.pack(side=TOP, padx=5, pady=5)
         
     def poblarCSV(self):
-        load = Label(self.frameB, text='Descargando datos')
-        load.config(background="#fff173")
-        load.pack(side=RIGHT)
         for url in self.urls:
             pagina = Pagina(EstadoPerfil(), Perfil(url), self.data)
             self.dataframes.append(pagina._perfil.data)
         self.data = pd.concat(self.dataframes)
         self.data.to_csv(self.ficheroFinal)
-        load.destroy()
         
     def buscarPerfiles():
         None
