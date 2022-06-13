@@ -7,7 +7,7 @@ from turtle import bgcolor, color
 import tkinterweb
 import os
 import tkinter
-from tkinter import BOTTOM, OptionMenu, PhotoImage, Tk, tix, RIGHT, BOTH, RAISED, TOP, LEFT, X, Y
+from tkinter import BOTTOM, OptionMenu, PhotoImage, StringVar, Tk, tix, RIGHT, BOTH, RAISED, TOP, LEFT, X, Y
 from tkinter.ttk import Frame, Button, Style, Label, Entry
 from place.perfil import *
 from scrap.estado import *
@@ -43,6 +43,7 @@ class MyFrame(tkinter.Frame):
         for sub in self.helpThree.subwidgets_all():
             sub.config(bg='white')
         self.ficheroFinal = ''
+        self.options = []
         self.initUI()
 
 
@@ -83,7 +84,7 @@ class MyFrame(tkinter.Frame):
         self.searchEntry = Entry(self.frame1)
         self.searchEntry.config(background="#ffffff")
         self.searchEntry.pack(side=LEFT, padx=5, pady=5)
-        self.searchButton = Button(self.frame1, text='Buscar')
+        self.searchButton = Button(self.frame1, text='Buscar', command=self.buscarPerfiles)
         self.searchButton.pack(side=LEFT, padx=5, pady=5)
         self.questionImageLabel = Label(self.frame1, image=self.questionImage, compound=LEFT, width=1, background="#ffffff")
         self.questionImageLabel.pack(side=LEFT, padx=5, pady=5)
@@ -97,6 +98,8 @@ class MyFrame(tkinter.Frame):
         option_list = ['']
         self.optionMenu1 = OptionMenu(self.frame2, self.options, *option_list)
         self.optionMenu1.pack(side=TOP, padx=5, pady=5)
+        self.selButton = Button(self.frame2, text='Seleccionar')
+        self.selButton.pack(side=BOTTOM, padx=5, pady=5)
         #######################################
         
         ############### FRAME 3 ############### 
@@ -173,19 +176,42 @@ class MyFrame(tkinter.Frame):
         self.data = pd.concat(self.dataframes)
         self.data.to_csv(self.ficheroFinal)
         
-    def buscarPerfiles():
-        None
-        #label_3.configure(text='kampo')
-        #asyncio.get_event_loop().run_until_complete(buscarPerfilesAsync())
+    def cerrar(self):
+        self.master.destroy()
+        
+    def buscarPerfiles(self):
+        asyncio.get_event_loop().run_until_complete(self.buscarPerfilesAsync())
     
-    async def buscarPerfilesAsync():
+    async def buscarPerfilesAsync(self):
+        if self.searchEntry.get() == '' or self.searchEntry.get() == None:
+            return
         # Abrir el navegador
-        browser = await launch({"frameHless": False, "args": ["--start-maximized"]})
+        browser = await launch({"headless": False, "args": ["--start-maximized"]})
         # Abrir una página nueva
         page = await browser.newPage()
         await page.setViewport({"width": 1600, "height": 900})
-        await page.waitFor(1500)
+        await page.goto('https://contrataciondelestado.es/wps/portal/!ut/p/b1/hY7LCoJAGIWfpQeI_59RR2c53o0uXnDK2YiQhZDaIiR6-kzcamd34Ps4BxQUW2LqhKJpGRwuoLpqaO7Vq-m76gEFKGWWQnqJiLiGQRp7SO3UZLp_GiuCbKt30zaf-vpzFSvtzLKETQSillsoWJI43EWKXBuBYgRwIQInf2kL6eyvAH_2z6AmxNAcXe5kzLIoQIxC393nxMCAshlYu7h-EuEY9m0NrRoO_fD0bmKz-QJnrBgZ/dl4/d5/L2dJQSEvUUt3SS80SmtFL1o2X0FWRVFBSTkzMEdSUEUwMkJSNzY0Rk8zMDAw/')
+        await page.waitFor(500)
+        await page.waitForSelector('#contenidoBuscador > fieldset:nth-child(1) > ul:nth-child(2) > li:nth-child(2)')
+        await page.type('#contenidoBuscador > fieldset:nth-child(1) > ul:nth-child(2) > li:nth-child(2)', str(self.searchEntry.get()))
+        await page.click('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:botonbuscar')
+        await page.waitFor(5000)
+        perfiles = await page.querySelectorAll('#tableBusquedaPerfilContratante > tbody > tr')
+        for perfil in perfiles:
+            #element = await page.querySelector(perfil)
+            txt = await (await perfil.getProperty('textContent')).jsonValue()
+            self.options.append(txt)
+        self.optionMenu1['menu'].delete(0,'end')
+        for choice in self.options:
+            var = StringVar(self.frame2)
+            var.set('')
+            self.optionMenu1['menu'].add_command(label=choice, command=tkinter._setit(var, choice))
+        await browser.close()
         
-    def cerrar(self):
-        self.master.destroy()
+    def cargarURL(self):
+        None
+        
+    async def cargarURLAsync(self):
+        None
+        
 
