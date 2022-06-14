@@ -7,7 +7,7 @@ from turtle import bgcolor, color
 import tkinterweb
 import os
 import tkinter
-from tkinter import BOTTOM, OptionMenu, PhotoImage, StringVar, Tk, tix, RIGHT, BOTH, RAISED, TOP, LEFT, X, Y
+from tkinter import BOTTOM, END, NW, OptionMenu, PhotoImage, StringVar, Tk, tix, RIGHT, BOTH, RAISED, TOP, LEFT, X, Y
 from tkinter.ttk import Frame, Button, Style, Label, Entry
 from place.perfil import *
 from scrap.estado import *
@@ -21,12 +21,12 @@ class MyFrame(tkinter.Frame):
         dict_expedientes = {'id': [], 'fecha': [], 'organo': [], 'estado': [], 'objeto': [], 'presupuesto': [], 'valor': [], 'tipo': [], 'cpv': [], 'lugar': [], 'procedimiento': []}
         self.data = pd.DataFrame.from_dict(dict_expedientes)
         self.dataframes = []
-        questionPath = str(os.getcwd()) + '\\imagenes\\interrogacion.png'
-        placePath = str(os.getcwd()) + '\\imagenes\\place.png'
-        perfilPath = str(os.getcwd()) + '\\imagenes\\perfil.png'
-        enlacePath = str(os.getcwd()) + '\\imagenes\\enlace.png'
-        tickPath = str(os.getcwd()) + '\\imagenes\\tick.png'
-        crossPath = str(os.getcwd()) + '\\imagenes\\cross.png'
+        questionPath = '.\\imagenes\\interrogacion.png'
+        placePath = '.\\imagenes\\place.png'
+        perfilPath = '.\\imagenes\\perfil.png'
+        enlacePath = '.\\imagenes\\enlace.png'
+        tickPath = '.\\imagenes\\tick.png'
+        crossPath = '.\\imagenes\\cross.png'
         self.questionImage = PhotoImage(file=questionPath).subsample(20, 20)
         self.placeImage = PhotoImage(file=placePath).subsample(1, 1)
         self.perfilImage = PhotoImage(file=perfilPath).subsample(2, 2)
@@ -43,7 +43,7 @@ class MyFrame(tkinter.Frame):
         for sub in self.helpThree.subwidgets_all():
             sub.config(bg='white')
         self.ficheroFinal = ''
-        self.options = []
+        self.menuOptions = []
         self.initUI()
 
 
@@ -55,7 +55,7 @@ class MyFrame(tkinter.Frame):
         
         self.frameH = tkinter.Frame(self, relief=RAISED, borderwidth=1, bg="#fff173")
         self.frame1 = tkinter.Frame(self, relief=RAISED, borderwidth=0, bg="#ffffff")
-        self.frame2 = tkinter.Frame(self, relief=RAISED, borderwidth=0, bg="#ffffff")
+        self.frame2 = tkinter.Frame(self, relief=RAISED, borderwidth=0, bg="#D3D3D3")
         self.frame3 = tkinter.Frame(self, relief=RAISED, borderwidth=0, bg="#ffffff")
         self.frame4 = tkinter.Frame(self, relief=RAISED, borderwidth=0, bg="#ffffff")
         self.frame5 = tkinter.Frame(self, relief=RAISED, borderwidth=0, bg="#ffffff")
@@ -96,9 +96,9 @@ class MyFrame(tkinter.Frame):
         self.options=tkinter.StringVar()
         self.options.set("Seleccione una opción")
         option_list = ['']
-        self.optionMenu1 = OptionMenu(self.frame2, self.options, *option_list)
+        self.optionMenu1 = OptionMenu(self.frame2, self.options, *option_list, command=self.cargarURL)
         self.optionMenu1.pack(side=TOP, padx=5, pady=5)
-        self.selButton = Button(self.frame2, text='Seleccionar')
+        self.selButton = Button(self.frame2, text='Seleccionar', command=self.cargarURL)
         self.selButton.pack(side=BOTTOM, padx=5, pady=5)
         #######################################
         
@@ -192,26 +192,39 @@ class MyFrame(tkinter.Frame):
         await page.setViewport({"width": 1600, "height": 900})
         await page.goto('https://contrataciondelestado.es/wps/portal/!ut/p/b1/hY7LCoJAGIWfpQeI_59RR2c53o0uXnDK2YiQhZDaIiR6-kzcamd34Ps4BxQUW2LqhKJpGRwuoLpqaO7Vq-m76gEFKGWWQnqJiLiGQRp7SO3UZLp_GiuCbKt30zaf-vpzFSvtzLKETQSillsoWJI43EWKXBuBYgRwIQInf2kL6eyvAH_2z6AmxNAcXe5kzLIoQIxC393nxMCAshlYu7h-EuEY9m0NrRoO_fD0bmKz-QJnrBgZ/dl4/d5/L2dJQSEvUUt3SS80SmtFL1o2X0FWRVFBSTkzMEdSUEUwMkJSNzY0Rk8zMDAw/')
         await page.waitFor(500)
-        await page.waitForSelector('#contenidoBuscador > fieldset:nth-child(1) > ul:nth-child(2) > li:nth-child(2)')
-        await page.type('#contenidoBuscador > fieldset:nth-child(1) > ul:nth-child(2) > li:nth-child(2)', str(self.searchEntry.get()))
+        await page.waitForSelector('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:texoorgano')
+        await page.type('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:texoorgano', str(self.searchEntry.get()))
         await page.click('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:botonbuscar')
-        await page.waitFor(5000)
+        await page.waitFor(1000)
         perfiles = await page.querySelectorAll('#tableBusquedaPerfilContratante > tbody > tr')
+        self.menuOptions.clear()
         for perfil in perfiles:
-            #element = await page.querySelector(perfil)
-            txt = await (await perfil.getProperty('textContent')).jsonValue()
-            self.options.append(txt)
+            txt = await perfil.querySelector('td:nth-child(1)')
+            text = await (await txt.getProperty('textContent')).jsonValue()
+            self.menuOptions.append(text)
         self.optionMenu1['menu'].delete(0,'end')
-        for choice in self.options:
-            var = StringVar(self.frame2)
-            var.set('')
-            self.optionMenu1['menu'].add_command(label=choice, command=tkinter._setit(var, choice))
+        for choice in self.menuOptions:
+            self.optionMenu1['menu'].add_command(label=choice, command=tkinter._setit(self.options, choice))
         await browser.close()
         
     def cargarURL(self):
-        None
+        asyncio.get_event_loop().run_until_complete(self.cargarURLAsync())
         
     async def cargarURLAsync(self):
-        None
-        
-
+        # Abrir el navegador
+        browser = await launch({"headless": False, "args": ["--start-maximized"]})
+        # Abrir una página nueva
+        page = await browser.newPage()
+        await page.setViewport({"width": 1600, "height": 900})
+        await page.goto('https://contrataciondelestado.es/wps/portal/!ut/p/b1/hY7LCoJAGIWfpQeI_59RR2c53o0uXnDK2YiQhZDaIiR6-kzcamd34Ps4BxQUW2LqhKJpGRwuoLpqaO7Vq-m76gEFKGWWQnqJiLiGQRp7SO3UZLp_GiuCbKt30zaf-vpzFSvtzLKETQSillsoWJI43EWKXBuBYgRwIQInf2kL6eyvAH_2z6AmxNAcXe5kzLIoQIxC393nxMCAshlYu7h-EuEY9m0NrRoO_fD0bmKz-QJnrBgZ/dl4/d5/L2dJQSEvUUt3SS80SmtFL1o2X0FWRVFBSTkzMEdSUEUwMkJSNzY0Rk8zMDAw/')
+        await page.waitFor(500)
+        await page.waitForSelector('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:texoorgano')
+        await page.type('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:texoorgano', str(self.options.get()))
+        await page.click('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:botonbuscar')
+        await page.waitForSelector('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:enlaceExpedienteBP_0')
+        await page.click('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:listaperfiles\:enlaceExpedienteBP_0')
+        await page.waitForSelector('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:perfilComp\:URLgenera')
+        url = await page.querySelector('#viewns_Z7_AVEQAI930GRPE02BR764FO30G0_\:perfilComp\:URLgenera')
+        self.urlEntry.delete(0, END)
+        self.urlEntry.insert(0, str(await (await url.getProperty('href')).jsonValue()))
+        await browser.close()
