@@ -1,11 +1,7 @@
-import asyncio
 
-from place import perfil
-from scrap import estado
 from tkinter import tix 
 from interfaz import interfaz
 import threading
-import tkinter as tk
 
 def main():
     root = tix.Tk()

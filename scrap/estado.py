@@ -2,7 +2,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pyppeteer import launch
 from place.perfil import Perfil
-from place.expediente import Expediente
 
 import asyncio
 

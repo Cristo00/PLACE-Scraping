@@ -1,19 +1,12 @@
 import asyncio
-from dataclasses import Field
-from struct import pack
 from pyppeteer import launch
-from distutils.cmd import Command
-from turtle import bgcolor, color
-import tkinterweb
 import os
 import tkinter
 from tkinter import BOTTOM, END, NW, OptionMenu, PhotoImage, StringVar, Tk, tix, RIGHT, BOTH, RAISED, TOP, LEFT, X, Y
-from tkinter.ttk import Frame, Button, Style, Label, Entry
+from tkinter.ttk import Button, Style, Label, Entry
 from place.perfil import *
 from scrap.estado import *
 import threading
-import time
-
 
 class MyFrame(tkinter.Frame):
 
