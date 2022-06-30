@@ -15,7 +15,7 @@ class Pagina:
         
     async def empezar(self, estado: Estado):
         self._estado = estado
-        self._buscador = await launch({"headless": True})
+        self._buscador = await launch({"headless": False, "args": ["--start-maximized"]})
         self._pagina_actual = await self._buscador.newPage()
         await self._pagina_actual.setViewport({"width": 1600, "height": 900})
         await self.siguiente_estado(estado)
